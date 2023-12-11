@@ -5,6 +5,7 @@ import validateEnv from './common/env-validation';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
+  validateEnv();
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
   app.enableCors({

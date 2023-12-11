@@ -24,7 +24,8 @@ import {
   YOU_HAVE_NOT_FOLLOWED_THIS_USER_ERROR,
 } from './user.constants';
 import { ResetPassDto } from './dto';
-import { MailService } from 'src/mail/mail.service';
+import { MailService } from '../mail/mail.service';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class UserService {
@@ -34,6 +35,7 @@ export class UserService {
     private tokenService: TokenService,
     private config: ConfigService,
     private mailService: MailService,
+    private fileService: FileService,
   ) {}
 
   async createUser(dto: SignupDto) {
@@ -323,7 +325,19 @@ export class UserService {
     });
   }
 
-  async updateUserInfo(userId: string, dto: UpdateUserDto) {
+  async updateUserInfo(
+    userId: string,
+    dto: UpdateUserDto,
+    image: Express.Multer.File,
+  ) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { profilPhoto: true },
+    });
+
+    if (!existingUser) {
+      throw new BadRequestException('User not found');
+    }
     if (dto.email) {
       const isEmailTaken = await this.prisma.user.findUnique({
         where: { email: dto.email },
@@ -332,22 +346,29 @@ export class UserService {
         throw new BadRequestException(`${dto.email} is already taken`);
       }
     }
-    let dataToUpdate: UpdateUserDto;
+    const fileName = await this.fileService.createFile(image);
+    let dataToUpdate: UpdateUserDto = {};
 
-    if (dto.firstname !== undefined) {
+    if (dto.firstname) {
       dataToUpdate.firstname = dto.firstname;
     }
 
-    if (dto.lastname !== undefined) {
+    if (dto.lastname) {
       dataToUpdate.lastname = dto.lastname;
     }
 
-    if (dto.email !== undefined) {
+    if (dto.email) {
       dataToUpdate.email = dto.email;
     }
 
-    if (dto.profilPhoto !== undefined) {
-      dataToUpdate.profilPhoto = dto.profilPhoto;
+    if (image) {
+      const fileName = await this.fileService.createFile(image);
+
+      if (existingUser.profilPhoto) {
+        await this.fileService.deleteFile(existingUser.profilPhoto);
+      }
+
+      dataToUpdate.profilPhoto = fileName;
     }
     return this.prisma.user.update({
       where: { id: userId },

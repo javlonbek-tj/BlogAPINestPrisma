@@ -1,6 +1,19 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtPayload } from '../auth/types';
 import { CurrentUser } from './decorators/currentUser.decorator';
+import { UpdateUserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { UserService } from './user.service';
 
@@ -47,5 +60,20 @@ export class UserController {
   @Get('/admin-unblock/:id')
   adinUnBlockUser(@Param('id') id: string) {
     return this.userService.adminUnBlockUser(id);
+  }
+
+  @Put('/')
+  @UseInterceptors(FileInterceptor('profilePhoto'))
+  updateUserInfo(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateUserDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file.mimetype.includes('image')) {
+      throw new BadRequestException(
+        'Uploaded file is not image. Please upload only an image.',
+      );
+    }
+    return this.userService.updateUserInfo(user.sub, dto, file);
   }
 }

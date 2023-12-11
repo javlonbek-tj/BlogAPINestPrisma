@@ -3,18 +3,18 @@ import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 export class UpdateUserDto {
   @IsNotEmpty()
   @IsOptional()
-  firstname: string;
+  firstname?: string;
 
   @IsNotEmpty()
   @IsOptional()
-  lastname: string;
+  lastname?: string;
 
   @IsEmail()
   @IsNotEmpty()
   @IsOptional()
-  email: string;
+  email?: string;
 
   @IsNotEmpty()
   @IsOptional()
-  profilPhoto: string;
+  profilPhoto?: string;
 }
