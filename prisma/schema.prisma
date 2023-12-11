@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String        @id @default(uuid())
+  firstname             String
+  lastname              String
+  profilPhoto           String?
+  email                 String        @unique
+  password              String
+  isBlocked             Boolean       @default(false)
+  roleId                String
+  role                  Role          @relation(fields: [roleId], references: [id])
+  viewers               User[]        @relation("ViewerToUser")
+  followers             User[]        @relation("UserFollowers")
+  followings            User[]        @relation("UserFollowings")
+  posts                 Post[]
+  comments              Comment[]
+  blockings             User[]        @relation("UserBlockings")
+  userAward             AwardEnumType @default(BRONZE)
+  isActivated           Boolean       @default(false)
+  activationCode        String
+  activationCodeExpires BigInt
+  passwordChangedAt     DateTime?
+  passwordResetToken    String?
+  passwordResetExpires  Int?
+  lastPostDate          DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  token                 Token?
+  postViewer            Post?         @relation("PostViews", fields: [postViewerId], references: [id])
+  postViewerId          String?
+  postLike              Post?         @relation("PostLikes", fields: [postLikeId], references: [id])
+  postLikeId            String?
+  postDislike           Post?         @relation("PostDislikes", fields: [postDislikeId], references: [id])
+  postDislikeId         String?
+  viewer                User?         @relation("ViewerToUser", fields: [viewerId], references: [id])
+  viewerId              String?
+  follower              User?         @relation("UserFollowers", fields: [followerId], references: [id])
+  followerId            String?
+  following             User?         @relation("UserFollowings", fields: [followingId], references: [id])
+  followingId           String?
+  blocking              User?         @relation("UserBlockings", fields: [blockingId], references: [id])
+  blockingId            String?
+}
+
+model Role {
+  id          String @id @default(uuid())
+  value       String @unique
+  description String
+  users       User[]
+}
+
+model Post {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  category    Category[]
+  numViews    User[]     @relation("PostViews")
+  likes       User[]     @relation("PostLikes")
+  dislikes    User[]     @relation("PostDislikes")
+  comments    Comment[]
+  author      User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    String
+  photo       String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  title     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Post      Post[]
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  post        Post     @relation(fields: [postId], references: [id])
+  postId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Token {
+  id           String @id @default(uuid())
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String @unique
+  refreshToken String
+}
+
+enum AwardEnumType {
+  BRONZE
+  SILVER
+  GOLD
+}
