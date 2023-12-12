@@ -346,7 +346,6 @@ export class UserService {
         throw new BadRequestException(`${dto.email} is already taken`);
       }
     }
-    const fileName = await this.fileService.createFile(image);
     let dataToUpdate: UpdateUserDto = {};
 
     if (dto.firstname) {
@@ -362,11 +361,10 @@ export class UserService {
     }
 
     if (image) {
-      const fileName = await this.fileService.createFile(image);
-
       if (existingUser.profilPhoto) {
         await this.fileService.deleteFile(existingUser.profilPhoto);
       }
+      const fileName = await this.fileService.createFile(image);
 
       dataToUpdate.profilPhoto = fileName;
     }
@@ -409,21 +407,20 @@ export class UserService {
       throw new BadRequestException(USER_NOT_FOUND_ERROR);
     }
     const resetToken = await this.createPasswordResetToken(email);
-    const resetUrl = `${this.config.get<string>(
-      'apiUrl',
-    )}/users/resetPassword/${resetToken}`;
-
     // Send resetUrl to user's email
     try {
       const subject = 'Your password reset token (valid for only 10 minutes)';
-      const link = `${this.config.get<string>(
-        'apiUrl',
-      )}/users/resetPassword/${resetUrl}`;
+      const baseUrl = this.config.get<string>('API_URL');
+      const link = `${baseUrl}/users/resetPassword/${resetToken}`;
       const html = `<div>
             <h1>For reset password hit this link</h1>
-            <a href="${link}">${link}</a>
+            <a href="${link}">Reset Password</a>
             </div>`;
-      this.mailService.sendMail(email, subject, html);
+      await this.mailService.sendMail(email, subject, html);
+      return {
+        status: 'success',
+        message: 'Password reset link has been sent to your email!',
+      };
     } catch (e) {
       this.prisma.user.update({
         where: { email },
@@ -435,7 +432,10 @@ export class UserService {
     }
   }
 
-  async resetPassword(resetToken: string, { password }: ResetPassDto) {
+  async resetPassword(resetToken: string, dto: ResetPassDto) {
+    if (dto.password !== dto.passwordConfirm) {
+      throw new BadRequestException(PASSWORD_DO_NOT_MATCH_ERROR);
+    }
     const passwordResetToken = crypto
       .createHash('sha256')
       .update(resetToken)
@@ -451,7 +451,10 @@ export class UserService {
     if (!user) {
       throw new BadRequestException(TOKEN_INVALID_OR_EXPIRED_ERROR);
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (dto.password !== dto.passwordConfirm) {
+      throw new BadRequestException(PASSWORD_DO_NOT_MATCH_ERROR);
+    }
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
     await this.prisma.user.update({
       where: {
         id: user.id,
@@ -480,7 +483,7 @@ export class UserService {
     passwordChangedAt: Date | null,
   ): boolean {
     if (passwordChangedAt) {
-      const changedTimestamp: number = passwordChangedAt.getTime() / 1000;
+      const changedTimestamp = passwordChangedAt.getTime() / 1000;
       return JWTTimestamp < changedTimestamp;
     }
     return false;

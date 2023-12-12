@@ -29,7 +29,7 @@ model User {
   activationCodeExpires BigInt
   passwordChangedAt     DateTime?
   passwordResetToken    String?
-  passwordResetExpires  Int?
+  passwordResetExpires  BigInt?
   lastPostDate          DateTime?
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt

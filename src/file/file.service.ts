@@ -10,12 +10,12 @@ import { promisify } from 'util';
 export class FileService {
   async createFile(file: Express.Multer.File): Promise<string> {
     try {
-      const fileName = `${uuid.v4()}.${file.originalname}`;
+      const fileName = `${uuid.v4()}_${file.originalname}`;
       const dateFolder = format(new Date(), 'yyyy-MM-dd');
       const filePath = `${path}/uploads/${dateFolder}`;
       await ensureDir(filePath);
       fs.writeFileSync(`${filePath}/${fileName}`, file.buffer);
-      return fileName;
+      return `${dateFolder}/${fileName}`;
     } catch (e) {
       throw new HttpException(
         'Error in uploading file',
@@ -27,7 +27,8 @@ export class FileService {
   async deleteFile(filePath: string): Promise<void> {
     try {
       const unlinkAsync = promisify(fs.unlink);
-      await unlinkAsync(filePath);
+      const fullFilePath = `${path}/uploads/${filePath}`;
+      await unlinkAsync(fullFilePath);
     } catch (e) {
       throw new HttpException(
         'Some went wrong. Try again.',

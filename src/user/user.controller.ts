@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -13,7 +15,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtPayload } from '../auth/types';
 import { CurrentUser } from './decorators/currentUser.decorator';
-import { UpdateUserDto } from './dto';
+import { EmailDto, ResetPassDto, UpdatePassDto, UpdateUserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { UserService } from './user.service';
 
@@ -69,11 +71,30 @@ export class UserController {
     @Body() dto: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!file.mimetype.includes('image')) {
+    if (!file || !file.mimetype.includes('image')) {
       throw new BadRequestException(
         'Uploaded file is not image. Please upload only an image.',
       );
     }
     return this.userService.updateUserInfo(user.sub, dto, file);
+  }
+
+  @Put('/change-password')
+  changePassword(@CurrentUser() user: JwtPayload, @Body() dto: UpdatePassDto) {
+    return this.userService.changeUserPassword(user.sub, dto);
+  }
+
+  @Post('/forgot-password')
+  @HttpCode(HttpStatus.OK)
+  forgotPassword(@Body() { email }: EmailDto) {
+    return this.userService.forgotPassword(email);
+  }
+
+  @Put('/reset-password/:resetToken')
+  resetPassword(
+    @Param('resetToken') resetToken: string,
+    @Body() password: ResetPassDto,
+  ) {
+    return this.userService.resetPassword(resetToken, password);
   }
 }
