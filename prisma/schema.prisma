@@ -25,11 +25,11 @@ model User {
   blockings             User[]        @relation("UserBlockings")
   userAward             AwardEnumType @default(BRONZE)
   isActivated           Boolean       @default(false)
-  activationCode        String
-  activationCodeExpires BigInt
+  activationCode        String?
+  activationCodeExpires DateTime?
   passwordChangedAt     DateTime?
   passwordResetToken    String?
-  passwordResetExpires  BigInt?
+  passwordResetExpires  DateTime?
   lastPostDate          DateTime?
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt

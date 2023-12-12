@@ -55,8 +55,8 @@ export class AuthService {
       .createHash('sha256')
       .update(numberAsString)
       .digest('hex');
-    const activationCodeExpires: number = Date.now() + 1 * 60 * 1000;
-
+    const activationCodeExpires: Date = new Date();
+    activationCodeExpires.setMinutes(activationCodeExpires.getMinutes() + 1);
     await this.prisma.user.update({
       where: { email },
       data: {
@@ -85,7 +85,7 @@ export class AuthService {
       where: {
         activationCode: hashedActivationCode,
         activationCodeExpires: {
-          gt: Date.now(),
+          gt: new Date(),
         },
       },
     });

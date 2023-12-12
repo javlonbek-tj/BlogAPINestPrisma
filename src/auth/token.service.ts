@@ -13,7 +13,7 @@ export class TokenService {
     private jwtService: JwtService,
     private config: ConfigService,
   ) {}
-  async generateTokens(payload: JwtPayload): Promise<Tokens> {
+  async generateTokens(payload: Omit<JwtPayload, 'iat'>): Promise<Tokens> {
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.config.get<string>('AT_SECRET'),
       expiresIn: this.config.get<string>('AT_EXPIRATION_DATE'),

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -96,5 +97,10 @@ export class UserController {
     @Body() password: ResetPassDto,
   ) {
     return this.userService.resetPassword(resetToken, password);
+  }
+
+  @Delete('/blocking/:id')
+  deleteAccount(@CurrentUser() user: JwtPayload) {
+    return this.userService.deleteAccount(user.sub);
   }
 }

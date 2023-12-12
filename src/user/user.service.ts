@@ -48,7 +48,8 @@ export class UserService {
       .createHash('sha256')
       .update(numberAsString)
       .digest('hex');
-    const activationCodeExpires: number = Date.now() + 1 * 60 * 1000;
+    const activationCodeExpires: Date = new Date();
+    activationCodeExpires.setMinutes(activationCodeExpires.getMinutes() + 1);
     const user = await this.prisma.user.create({
       data: {
         firstname,
@@ -444,9 +445,10 @@ export class UserService {
       where: {
         passwordResetToken,
         passwordResetExpires: {
-          gt: Date.now(),
+          gt: new Date(),
         },
       },
+      select: this.getUserSelectFields(),
     });
     if (!user) {
       throw new BadRequestException(TOKEN_INVALID_OR_EXPIRED_ERROR);
@@ -478,24 +480,14 @@ export class UserService {
     await this.prisma.user.delete({ where: { id: userId } });
   }
 
-  changedPasswordAfter(
-    JWTTimestamp: number,
-    passwordChangedAt: Date | null,
-  ): boolean {
-    if (passwordChangedAt) {
-      const changedTimestamp = passwordChangedAt.getTime() / 1000;
-      return JWTTimestamp < changedTimestamp;
-    }
-    return false;
-  }
-
   async createPasswordResetToken(email: string) {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const passwordResetToken = crypto
       .createHash('sha256')
       .update(resetToken)
       .digest('hex');
-    const passwordResetExpires: number = Date.now() + 10 * 60 * 1000;
+    const passwordResetExpires: Date = new Date();
+    passwordResetExpires.setMinutes(passwordResetExpires.getMinutes() + 10);
     await this.prisma.user.update({
       where: { email },
       data: {
