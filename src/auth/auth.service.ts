@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcryptjs';
-import { UserService } from '../user/user.service';
+import { UserService } from '../users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { USER_IN_USE_ERROR } from '../user/user.constants';
+import { USER_IN_USE_ERROR } from '../users/users.constants';
 import { PASSWORD_DO_NOT_MATCH_ERROR } from './auth.constants';
 import { SigninDto, SignupDto } from './dto';
 import { MailService } from 'src/mail/mail.service';

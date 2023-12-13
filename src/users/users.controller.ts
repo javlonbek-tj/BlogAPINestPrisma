@@ -18,7 +18,7 @@ import { JwtPayload } from '../auth/types';
 import { CurrentUser } from './decorators/currentUser.decorator';
 import { EmailDto, ResetPassDto, UpdatePassDto, UpdateUserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
-import { UserService } from './user.service';
+import { UserService } from './users.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')

@@ -1,9 +1,9 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
+import { UserController } from './users.controller';
+import { UserService } from './users.service';
 import { RoleModule } from 'src/role/role.module';
 import { PassportModule } from '@nestjs/passport';
-import { FileModule } from '../file/file.module';
+import { FileModule } from '../files/files.module';
 import { AuthModule } from '../auth/auth.module';
 import { MailModule } from '../mail/mail.module';
 

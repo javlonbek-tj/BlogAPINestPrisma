@@ -22,10 +22,10 @@ import {
   YOU_ALREADY_FOLLOWED_THIS_USER_ERROR,
   YOU_HAVE_NOT_BLOCKED_THIS_USER_ERROR,
   YOU_HAVE_NOT_FOLLOWED_THIS_USER_ERROR,
-} from './user.constants';
+} from './users.constants';
 import { ResetPassDto } from './dto';
 import { MailService } from '../mail/mail.service';
-import { FileService } from '../file/file.service';
+import { FileService } from '../files/files';
 
 @Injectable()
 export class UserService {
@@ -347,31 +347,17 @@ export class UserService {
         throw new BadRequestException(`${dto.email} is already taken`);
       }
     }
-    let dataToUpdate: UpdateUserDto = {};
-
-    if (dto.firstname) {
-      dataToUpdate.firstname = dto.firstname;
-    }
-
-    if (dto.lastname) {
-      dataToUpdate.lastname = dto.lastname;
-    }
-
-    if (dto.email) {
-      dataToUpdate.email = dto.email;
-    }
-
+    let profilPhoto: string;
     if (image) {
       if (existingUser.profilPhoto) {
         await this.fileService.deleteFile(existingUser.profilPhoto);
       }
       const fileName = await this.fileService.createFile(image);
-
-      dataToUpdate.profilPhoto = fileName;
+      profilPhoto = fileName;
     }
     return this.prisma.user.update({
       where: { id: userId },
-      data: dataToUpdate,
+      data: { ...dto, profilPhoto },
       select: this.getUserSelectFields(),
     });
   }
