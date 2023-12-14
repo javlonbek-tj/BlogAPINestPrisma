@@ -10,9 +10,10 @@ import {
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CommentDto } from './dto';
-import { JwtAuthGuard } from 'src/users/guards/jwt.guard';
 import { CurrentUser } from 'src/users/decorators/currentUser.decorator';
 import { JwtPayload } from 'src/auth/types';
+import { JwtAuthGuard } from 'src/guards/jwt.guard';
+import { RestricTo } from 'src/decorators/role.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('comments')
@@ -43,6 +44,7 @@ export class CommentsController {
     return this.commentService.update(id, user.sub, dto);
   }
 
+  @RestricTo('ADMIN', 'USER')
   @Delete('/:id')
   deleteComment(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.commentService.delete(user.sub, id);

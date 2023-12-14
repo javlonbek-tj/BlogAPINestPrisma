@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import { SignupDto } from '../auth/dto/signup.dto';
@@ -352,8 +348,7 @@ export class UserService {
       if (existingUser.profilPhoto) {
         await this.fileService.deleteFile(existingUser.profilPhoto);
       }
-      const fileName = await this.fileService.createFile(image);
-      profilPhoto = fileName;
+      profilPhoto = await this.fileService.createFile(image);
     }
     return this.prisma.user.update({
       where: { id: userId },

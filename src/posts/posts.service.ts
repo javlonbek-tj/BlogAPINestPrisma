@@ -19,19 +19,19 @@ export class PostsService {
   ) {}
   async create(
     authorId: string,
-    postImage: Express.Multer.File,
+    image: Express.Multer.File,
     { title, description, categories }: CreatePostDto,
   ) {
     const user = await this.prisma.user.findUnique({ where: { id: authorId } });
     if (user.isBlocked) {
       throw new UnauthorizedException(UNAUTHORIZED_ERROR);
     }
-    const fileName = await this.fileService.createFile(postImage);
+    const postImage = await this.fileService.createFile(image);
     const post = await this.prisma.post.create({
       data: {
         title,
         description,
-        photo: fileName,
+        postImage,
         authorId,
         category: {
           connect: categories.map((category) => ({ id: category })),
@@ -118,7 +118,7 @@ export class PostsService {
   async updatePost(
     postId: string,
     userId: string,
-    postImage: Express.Multer.File,
+    image: Express.Multer.File,
     dto: UpdatePostDto,
   ) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
@@ -128,17 +128,16 @@ export class PostsService {
     if (post.authorId !== userId) {
       throw new UnauthorizedException(UNAUTHORIZED_ERROR);
     }
-    let photo: string;
-    if (postImage) {
-      if (post.photo) {
-        await this.fileService.deleteFile(post.photo);
+    let postImage: string;
+    if (image) {
+      if (post.postImage) {
+        await this.fileService.deleteFile(post.postImage);
       }
-      const fileName = await this.fileService.createFile(postImage);
-      photo = fileName;
+      postImage = await this.fileService.createFile(image);
     }
     return this.prisma.post.update({
       where: { id: postId },
-      data: { ...dto, photo },
+      data: { ...dto, postImage },
     });
   }
 

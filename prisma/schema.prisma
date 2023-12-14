@@ -68,7 +68,7 @@ model Post {
   comments    Comment[]
   author      User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId    String
-  photo       String
+  postImage   String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }

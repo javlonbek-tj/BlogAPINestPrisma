@@ -110,9 +110,16 @@ export class CommentsService {
     if (!comment) {
       throw new UnauthorizedException(UNAUTHORIZED_ERROR);
     }
-    if (userId !== comment.userId) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        role: true,
+      },
+    });
+    if (userId === comment.userId || user.role.value === 'ADMIN') {
+      return await this.prisma.comment.delete({ where: { id: commentId } });
+    } else {
       throw new UnauthorizedException(UNAUTHORIZED_ERROR);
     }
-    await this.prisma.comment.delete({ where: { id: commentId } });
   }
 }

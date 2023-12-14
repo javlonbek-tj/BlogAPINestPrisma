@@ -6,10 +6,15 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CategoryDto } from './dto';
+import { RestricTo } from 'src/decorators/role.decorator';
+import { JwtAuthGuard } from 'src/guards/jwt.guard';
 
+@UseGuards(JwtAuthGuard)
+@RestricTo('ADMIN', 'EDITOR')
 @Controller('categories')
 export class CategoriesController {
   constructor(private categoryService: CategoriesService) {}
