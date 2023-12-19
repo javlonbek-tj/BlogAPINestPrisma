@@ -1,3 +1,4 @@
+import { RestricTo } from 'src/decorators/role.decorator';
 import {
   BadRequestException,
   Body,
@@ -20,10 +21,16 @@ import { EmailDto, ResetPassDto, UpdatePassDto, UpdateUserDto } from './dto';
 import { UserService } from './users.service';
 import { JwtAuthGuard } from 'src/guards/jwt.guard';
 
-@UseGuards(JwtAuthGuard)
+/* @UseGuards(JwtAuthGuard) */
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
+
+  @RestricTo('ADMIN')
+  @Get()
+  allUsers() {
+    return this.userService.getAllUsers();
+  }
 
   @Get('/viewers')
   profileViewers(@CurrentUser() user: JwtPayload) {

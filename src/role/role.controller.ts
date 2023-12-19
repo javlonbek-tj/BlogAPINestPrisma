@@ -8,10 +8,12 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto, UpdateRoleDto } from './dto';
 import { RestricTo } from 'src/decorators/role.decorator';
+import { JwtAuthGuard } from 'src/guards/jwt.guard';
 
 @RestricTo('ADMIN')
 @Controller('roles')

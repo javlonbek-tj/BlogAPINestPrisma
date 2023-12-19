@@ -34,20 +34,15 @@ model User {
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
   token                 Token?
-  postViewer            Post?         @relation("PostViews", fields: [postViewerId], references: [id])
-  postViewerId          String?
+  postViewer            Post[]        @relation("PostViews")
   postLike              Post?         @relation("PostLikes", fields: [postLikeId], references: [id])
   postLikeId            String?
   postDislike           Post?         @relation("PostDislikes", fields: [postDislikeId], references: [id])
   postDislikeId         String?
-  viewer                User?         @relation("ViewerToUser", fields: [viewerId], references: [id])
-  viewerId              String?
-  follower              User?         @relation("UserFollowers", fields: [followerId], references: [id])
-  followerId            String?
-  following             User?         @relation("UserFollowings", fields: [followingId], references: [id])
-  followingId           String?
-  blocking              User?         @relation("UserBlockings", fields: [blockingId], references: [id])
-  blockingId            String?
+  viewer                User[]        @relation("ViewerToUser")
+  follower              User[]        @relation("UserFollowers")
+  following             User[]        @relation("UserFollowings")
+  blocking              User[]        @relation("UserBlockings")
 }
 
 model Role {

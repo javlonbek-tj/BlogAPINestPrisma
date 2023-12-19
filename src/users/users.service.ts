@@ -60,6 +60,10 @@ export class UserService {
     return { user, randomSixDigitNumber };
   }
 
+  getAllUsers() {
+    return this.prisma.user.findMany();
+  }
+
   findUser(email: string) {
     return this.prisma.user.findUnique({ where: { email } });
   }
