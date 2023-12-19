@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -13,7 +15,7 @@ import { CommentDto } from './dto';
 import { CurrentUser } from 'src/users/decorators/currentUser.decorator';
 import { JwtPayload } from 'src/auth/types';
 import { JwtAuthGuard } from 'src/guards/jwt.guard';
-import { RestricTo } from 'src/decorators/role.decorator';
+import { Roles } from 'src/guards/roles.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('comments')
@@ -44,8 +46,9 @@ export class CommentsController {
     return this.commentService.update(id, user.sub, dto);
   }
 
-  @RestricTo('ADMIN', 'USER')
+  @UseGuards(Roles('ADMIN', 'USER'))
   @Delete('/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   deleteComment(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.commentService.delete(user.sub, id);
   }

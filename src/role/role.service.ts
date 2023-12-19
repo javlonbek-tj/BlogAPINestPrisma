@@ -1,13 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ROLE_NOT_FOUND_ERROR } from './role.constants';
+import {
+  ROLE_ALREADY_EXISTS_ERROR,
+  ROLE_NOT_FOUND_ERROR,
+} from './role.constants';
 import { CreateRoleDto, UpdateRoleDto } from './dto';
 
 @Injectable()
 export class RoleService {
   constructor(private prisma: PrismaService) {}
 
-  createRole(dto: CreateRoleDto) {
+  async createRole(dto: CreateRoleDto) {
+    const isRoleExists = await this.prisma.role.findUnique({
+      where: { value: dto.value },
+    });
+    if (isRoleExists) {
+      throw new BadRequestException(ROLE_ALREADY_EXISTS_ERROR);
+    }
     return this.prisma.role.create({
       data: {
         ...dto,

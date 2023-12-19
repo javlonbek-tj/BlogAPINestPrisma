@@ -456,6 +456,7 @@ export class UserService {
     const tokens = await this.tokenService.generateTokens({
       sub: user.id,
       email: user.email,
+      role: user.role.value,
     });
     await this.tokenService.saveToken(user.id, tokens.refreshToken);
     return { ...tokens, user };

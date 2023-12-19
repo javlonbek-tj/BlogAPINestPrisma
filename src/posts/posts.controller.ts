@@ -1,10 +1,11 @@
-import { RestricTo } from 'src/decorators/role.decorator';
 import {
   BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -18,6 +19,7 @@ import { JwtPayload } from 'src/auth/types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreatePostDto, UpdatePostDto } from './dto';
 import { JwtAuthGuard } from 'src/guards/jwt.guard';
+import { Roles } from 'src/guards/roles.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('posts')
@@ -60,7 +62,8 @@ export class PostsController {
     return this.postService.updatePost(id, user.sub, file, dto);
   }
 
-  @RestricTo('ADMIN', 'USER')
+  @UseGuards(Roles('ADMIN', 'USER'))
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/:id')
   async delete(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.postService.deletePost(id, user.sub);

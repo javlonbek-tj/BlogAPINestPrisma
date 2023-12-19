@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -10,11 +12,10 @@ import {
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CategoryDto } from './dto';
-import { RestricTo } from 'src/decorators/role.decorator';
 import { JwtAuthGuard } from 'src/guards/jwt.guard';
+import { Roles } from 'src/guards/roles.guard';
 
-@UseGuards(JwtAuthGuard)
-@RestricTo('ADMIN', 'EDITOR')
+@UseGuards(JwtAuthGuard, Roles('ADMIN', 'EDITOR'))
 @Controller('categories')
 export class CategoriesController {
   constructor(private categoryService: CategoriesService) {}
@@ -39,7 +40,9 @@ export class CategoriesController {
     return this.categoryService.updateCategory(id, dto);
   }
 
+  @UseGuards(Roles('ADMIN', 'USER'))
   @Delete('/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   deleteCategory(@Param('id') id: string) {
     return this.categoryService.deleteCategory(id);
   }

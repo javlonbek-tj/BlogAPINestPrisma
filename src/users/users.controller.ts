@@ -1,4 +1,3 @@
-import { RestricTo } from 'src/decorators/role.decorator';
 import {
   BadRequestException,
   Body,
@@ -20,13 +19,14 @@ import { CurrentUser } from './decorators/currentUser.decorator';
 import { EmailDto, ResetPassDto, UpdatePassDto, UpdateUserDto } from './dto';
 import { UserService } from './users.service';
 import { JwtAuthGuard } from 'src/guards/jwt.guard';
+import { Roles } from 'src/guards/roles.guard';
 
-/* @UseGuards(JwtAuthGuard) */
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @RestricTo('ADMIN')
+  @UseGuards(Roles('ADMIN'))
   @Get()
   allUsers() {
     return this.userService.getAllUsers();
@@ -62,11 +62,13 @@ export class UserController {
     return this.userService.unBlockUser(id, user.sub);
   }
 
+  @UseGuards(Roles('ADMIN'))
   @Get('/admin-block/:id')
   adinBlockUser(@Param('id') id: string) {
     return this.userService.adminBlockUser(id);
   }
 
+  @UseGuards(Roles('ADMIN'))
   @Get('/admin-unblock/:id')
   adinUnBlockUser(@Param('id') id: string) {
     return this.userService.adminUnBlockUser(id);

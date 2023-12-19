@@ -88,6 +88,11 @@ export class AuthService {
           gt: new Date(),
         },
       },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+      },
     });
     if (!user) {
       throw new BadRequestException('Incorrect code');
@@ -101,6 +106,7 @@ export class AuthService {
     const tokens = await this.tokenService.generateTokens({
       email: user.email,
       sub: user.id,
+      role: user.role.value,
     });
     await this.tokenService.saveToken(user.id, tokens.refreshToken);
     return tokens;
@@ -131,6 +137,7 @@ export class AuthService {
     const tokens = await this.tokenService.generateTokens({
       email: existingUser.email,
       sub: existingUser.id,
+      role: existingUser.role.value,
     });
     await this.tokenService.saveToken(existingUser.id, tokens.refreshToken);
     return { tokens, existingUser };
